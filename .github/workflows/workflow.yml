@@ -7,8 +7,8 @@ on:
   push:
     branches:
       - main # Ganti 'main' jika branch utama Anda 'master' atau nama lain
-  # Anda juga bisa menambahkan pemicu lain, misalnya:
-  # workflow_dispatch: # Memungkinkan Anda menjalankan workflow secara manual dari GitHub Actions UI
+  # Memungkinkan Anda menjalankan workflow secara manual dari GitHub Actions UI
+  workflow_dispatch: 
 
 # Jobs yang akan dijalankan dalam workflow ini
 jobs:
@@ -33,11 +33,24 @@ jobs:
         # Pastikan semua library yang digunakan terinstal di sini
         pip install pandas numpy scikit-learn
 
+    - name: Debug - List Files and Directories (for troubleshooting)
+      # Ini akan mencetak struktur folder dan file di dalam runner.
+      # Pastikan 'breast_cancer_dataset/data.csv' terlihat di sini.
+      run: |
+        echo "Listing contents of current directory (root of repository):"
+        ls -l
+        echo "Listing contents of breast_cancer_dataset/:"
+        ls -l breast_cancer_dataset/
+        echo "Listing contents of preprocessing/:"
+        ls -l preprocessing/
+        echo "Listing contents of preprocessing/breast_cancer_dataset_preprocessed/ (if it exists):"
+        ls -l preprocessing/breast_cancer_dataset_preprocessed/ || echo "Folder does not exist yet or is empty."
+
+
     - name: Run Data Preprocessing Script
       run: |
         # Panggil script Python Anda dari folder preprocessing
         # Perhatikan path relatifnya dari root proyek
-        # Script Anda akan mencari data.csv di breast_cancer_dataset/
         python preprocessing/automate_Zulfahmi_M_Ardianto.py
 
     - name: Upload Preprocessed Data as Artifact
@@ -46,10 +59,11 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: preprocessed-data
+        # Path ini harus sesuai dengan lokasi file output yang dibuat oleh script Python Anda
         path: |
-          preprocessing/preprocessed/X_train_scaled.csv
-          preprocessing/preprocessed/X_test_scaled.csv
-          preprocessing/preprocessed/y_train.csv
-          preprocessing/preprocessed/y_test.csv
-        # Jika Anda ingin menyimpan artifact ini lebih lama (default 90 hari)
+          preprocessing/breast_cancer_dataset_preprocessed/X_train_scaled.csv
+          preprocessing/breast_cancer_dataset_preprocessed/X_test_scaled.csv
+          preprocessing/breast_cancer_dataset_preprocessed/y_train.csv
+          preprocessing/breast_cancer_dataset_preprocessed/y_test.csv
+        # Anda bisa mengatur berapa lama artifact akan disimpan (default 90 hari)
         # retention-days: 7
