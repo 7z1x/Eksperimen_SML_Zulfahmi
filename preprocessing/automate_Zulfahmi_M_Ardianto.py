@@ -8,7 +8,7 @@ def preprocess_data(test_size=0.2, random_state=42):
     print("Memulai preprocessing data...")
     # 1. Muat dataset langsung dari path
     print("Membaca file data.csv...")
-    df_processed = pd.read_csv("data.csv")
+    data_path = os.path.join("breast_cancer_dataset", "data.csv")
     print("File berhasil dibaca!")
     
     # 2. Label Encoding untuk kolom 'diagnosis' (jika belum dilakukan)
