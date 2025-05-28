@@ -6,11 +6,27 @@ from sklearn.preprocessing import StandardScaler
 
 def preprocess_data(test_size=0.2, random_state=42):
     print("Memulai preprocessing data...")
+    
     # 1. Muat dataset langsung dari path
     print("Membaca file data.csv...")
-    data_path = os.path.join("breast_cancer_dataset", "data.csv")
-    print("File berhasil dibaca!")
     
+    # Pastikan path ini benar relatif terhadap root proyek Anda
+    # Ini akan mencari file di: your_project_root/breast_cancer_dataset/data.csv
+    data_path = os.path.join("breast_cancer_dataset", "data.csv")
+    
+    # Tambahkan try-except block untuk penanganan error saat membaca file
+    try:
+        df_processed = pd.read_csv(data_path)
+        print(f"File '{data_path}' berhasil dibaca!")
+    except FileNotFoundError:
+        print(f"ERROR: File '{data_path}' tidak ditemukan. Pastikan path dan nama file benar.")
+        # Mengangkat ulang error agar workflow GitHub Actions juga gagal dan terlihat jelas
+        raise 
+    except Exception as e:
+        print(f"ERROR: Terjadi kesalahan saat membaca file '{data_path}': {e}")
+        # Mengangkat ulang error agar workflow GitHub Actions juga gagal
+        raise
+
     # 2. Label Encoding untuk kolom 'diagnosis' (jika belum dilakukan)
     if df_processed['diagnosis'].dtype == 'object':
         df_processed['diagnosis'] = df_processed['diagnosis'].map({'M': 1, 'B': 0})
@@ -32,9 +48,8 @@ def preprocess_data(test_size=0.2, random_state=42):
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
-    # 7. Simpan data yang sudah diproses ke folder preprocessed
-    preprocessed_dir = "preprocessed"
-    os.makedirs(preprocessed_dir, exist_ok=True)  
+    preprocessed_dir = os.path.join("preprocessing", "breast_cancer_dataset_preprocessed")
+    os.makedirs(preprocessed_dir, exist_ok=True) 
 
     X_train_scaled_df = pd.DataFrame(X_train_scaled, columns=X.columns)
     X_test_scaled_df = pd.DataFrame(X_test_scaled, columns=X.columns)
@@ -45,7 +60,7 @@ def preprocess_data(test_size=0.2, random_state=42):
     y_train.to_csv(os.path.join(preprocessed_dir, "y_train.csv"), index=False)
     y_test.to_csv(os.path.join(preprocessed_dir, "y_test.csv"), index=False)
 
-    print("Data yang sudah diproses berhasil disimpan di folder dataset/preprocessed!")
+    print(f"Data yang sudah diproses berhasil disimpan di '{preprocessed_dir}'!")
 
     return X_train_scaled, X_test_scaled, y_train, y_test, scaler
 
